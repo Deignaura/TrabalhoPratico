@@ -1,4 +1,4 @@
-# Nome do Jogo
+# Turbo Escape
 
 Projeto final da disciplina de Introdução a Algoritmos/Programação, desenvolvido com Python e Pygame.
 
@@ -11,54 +11,63 @@ Este repositório é um template para os grupos da disciplina. A proposta é com
 - Clara Lemos
 - Deignaura Ribeiro
 
-## Estrutura do projeto
+## Organização planejada
 
-- `main.py`: ponto de entrada da aplicação.
-- `src/`: código-fonte principal do jogo (loop, regras, sprites e dados).
+- `main.py`: inicia o jogo.
+-`player.py` controla o carro do jogador
 - `assets/`: imagens, fontes e sons.
+- `obstacles.py` controla obstaculos.
+- `coins.py` controla as moedas.
+- `config.py` configurações gerais.
+- `utilis.py` funções auxiliadoreas.
 - `data/`: arquivos persistentes (recorde/ranking).
 - `tests/`: testes unitários com `pytest`.
 - `docs/`: documentação do projeto, incluindo proposta inicial.
 
 ## Descrição do jogo
 
-Descreva brevemente a ideia principal do jogo.
+O jogador controlará um carro em uma estrada 2D com movimentação lateral. Durante a corrida, carros, cones e barreiras aparecerão na pista como obstáculos. O objetivo será desviar dos obstáculos enquanto coleta moedas espalhadas pela estrada. Conforme o tempo passa, a velocidade do jogo aumenta, deixando a partida mais difícil e dinâmica.
 
-Exemplo:
-
-> O jogo consiste em controlar um personagem que deve coletar moedas e evitar obstáculos. O jogador ganha pontos ao coletar itens e perde vidas ao colidir com obstáculos. A partida termina quando o tempo acaba ou quando o jogador perde todas as vidas.
 
 ## Objetivo do jogador
 
-Explique o que o jogador precisa fazer para vencer ou avançar no jogo.
-
-Exemplo:
-
-> O objetivo é coletar a maior quantidade possível de itens antes que o tempo acabe, evitando colisões com os obstáculos.
+Sobreviver o maior tempo possível, evitar colisões e coletar moedas para alcançar a maior pontuação.
 
 ## Regras do jogo
 
-Liste as principais regras do jogo.
+Regra 1: O jogador começa com 3 vidas.
+Regra 2: Cada moeda coletada vale 5 pontos.
+Regra 3: Cada colisão com obstáculo remove 1 vida.
+Regra 4: A velocidade da pista e dos obstáculos aumenta gradualmente.
+Regra 5: O jogo termina quando as vidas chegam a zero.
 
-Exemplo:
 
-- O jogador se movimenta usando as setas do teclado.
-- Cada item coletado aumenta a pontuação.
-- Colidir com um obstáculo reduz a quantidade de vidas.
-- A partida termina quando o jogador perde todas as vidas ou quando o tempo acaba.
+## Condição de vitória
+
+O jogador vence ao atingir determinada pontuação, como 200 pontos, ou sobreviver até o final da corrida.
+
+## Condição de derrota ou encerramento
+
+O jogo termina quando o jogador perde todas as vidas após colidir com obstáculos.
+## Elementos previstos no jogo
+Jogador ou elemento principal
+Descrição:
+Um carro controlado pelo teclado que pode se mover para esquerda e direita na pista.
+Obstáculos, inimigos ou desafios
+Descrição:
+Carros, cones e barreiras aparecem aleatoriamente na pista e devem ser evitados.
+Itens, alvos ou objetos de interação
+Descrição:
+Moedas aparecem na estrada e aumentam a pontuação quando coletadas.
+Pontuação, vidas, tempo ou progresso
+Descrição:
+O jogador começa com 3 vidas, coleta moedas para ganhar pontos e enfrenta aumento gradual da velocidade do jogo
 
 ## Controles
 
-Informe as teclas ou comandos utilizados no jogo.
-
-Exemplo:
-
-- Seta para cima: mover para cima
-- Seta para baixo: mover para baixo
-- Seta para esquerda: mover para esquerda
-- Seta para direita: mover para direita
-- Espaço: realizar ação
-- ESC: sair do jogo
+Seta esquerda / A: mover para esquerda
+Seta direita / D: mover para direita
+ESC: sair do jogo
 
 ## Como executar o projeto
 
