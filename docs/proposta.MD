@@ -16,10 +16,10 @@ Exemplo:
 
 Liste os integrantes do grupo.
 
-- Nome 1:
-- Nome 2:
-- Nome 3:
-- Nome 4:
+- Nome 1: Amanda Pimenta 
+- Nome 2: Bruna Batista
+- Nome 3: Clara Lemos
+- Nome 4: Deignaura Ribeiro
 
 ## 3. Tipo de jogo
 
@@ -42,7 +42,7 @@ Exemplos:
 
 Tipo escolhido pelo grupo:
 
-> Escreva aqui.
+Jogo de desviar de obstáculos;
 
 ## 4. Descrição geral do jogo
 
@@ -57,7 +57,7 @@ Procure responder:
 
 Descrição:
 
-> Escreva aqui.
+O jogador controlará um carro em uma estrada 2D com movimentação lateral. Durante a corrida, carros, cones e barreiras aparecerão na pista como obstáculos. O objetivo será desviar dos obstáculos enquanto coleta moedas espalhadas pela estrada. Conforme o tempo passa, a velocidade do jogo aumenta, deixando a partida mais difícil e dinâmica.
 
 ## 5. Objetivo do jogador
 
@@ -75,7 +75,7 @@ Exemplos:
 
 Objetivo:
 
-> Escreva aqui.
+Sobreviver o maior tempo possível, evitar colisões e coletar moedas para alcançar a maior pontuação.
 
 ## 6. Regras principais
 
@@ -91,11 +91,11 @@ Exemplo:
 
 Regras do grupo:
 
-- Regra 1:
-- Regra 2:
-- Regra 3:
-- Regra 4:
-- Regra 5:
+- Regra 1:  O jogador começa com 3 vidas.
+- Regra 2:  Cada moeda coletada vale 5 pontos.
+- Regra 3:  Cada colisão com obstáculo remove
+- Regra 4:  A velocidade da pista e dos obstáculos aumenta gradualmente.
+- Regra 5:  O jogo termina quando as vidas chegam a zero.
 
 ## 7. Condição de vitória
 
@@ -111,7 +111,7 @@ Exemplos:
 
 Condição de vitória:
 
-> Escreva aqui.
+O jogador vence ao atingir determinada pontuação, como 200 pontos, ou sobreviver até o final da corrida.
 
 ## 8. Condição de derrota ou encerramento
 
@@ -127,7 +127,7 @@ Exemplos:
 
 Condição de derrota ou encerramento:
 
-> Escreva aqui.
+O jogo termina quando o jogador perde todas as vidas após colidir com obstáculos.
 
 ## 9. Elementos previstos no jogo
 
@@ -141,7 +141,7 @@ Exemplo:
 
 Descrição:
 
-> Escreva aqui.
+ Um carro controlado pelo teclado que pode se mover para esquerda e direita na pista.
 
 ## Obstáculos, inimigos ou desafios
 
@@ -151,7 +151,7 @@ Exemplo:
 
 Descrição:
 
-> Escreva aqui.
+Carros, cones e barreiras aparecem aleatoriamente na pista e devem ser evitados. Itens, alvos ou objetos de interação
 
 ## Itens, alvos ou objetos de interação
 
@@ -161,7 +161,7 @@ Exemplo:
 
 Descrição:
 
-> Escreva aqui.
+Moedas aparecem na estrada e aumentam a pontuação quando coletadas. Pontuação, vidas, tempo ou progresso
 
 ## Pontuação, vidas, tempo ou progresso
 
@@ -171,7 +171,7 @@ Exemplo:
 
 Descrição:
 
-> Escreva aqui.
+ O jogador começa com 3 vidas, coleta moedas para ganhar pontos e enfrenta aumento gradual da velocidade do jogo
 
 ## 10. Controles previstos
 
@@ -188,9 +188,9 @@ Exemplo:
 
 Controles do grupo:
 
-- Tecla/comando:
-- Tecla/comando:
-- Tecla/comando:
+- Tecla/comando:Seta esquerda / A: mover para esquerda 
+- Tecla/comando: Seta direita / D: mover para direita 
+- Tecla/comando: ESC: sair do jogo
 
 ## 11. Organização inicial do código
 
@@ -206,7 +206,15 @@ Exemplo:
 
 Organização planejada:
 
-> Escreva aqui.
+- main.py: inicia o jogo. -player.py controla o carro do jogador
+- assets/: imagens, fontes e sons.
+- obstacles.py controla obstaculos.
+- coins.py controla as moedas.
+- config.py configurações gerais.
+- utilis.py funções auxiliadoreas.
+- data/: arquivos persistentes (recorde/ranking).
+- tests/: testes unitários com pytest.
+- docs/: documentação do projeto, incluindo proposta inicial.
 
 
 ## 12. Recursos externos previstos
@@ -222,7 +230,7 @@ Exemplo:
 
 Recursos previstos:
 
-> Escreva aqui.
+Pretendemos utilizar imagens, sons e fontes gratuitas para melhorar a experiência do jogador, além de tutoriais apenas como referência para implementação de funcionalidades.
 
 Caso não pretenda utilizar recursos externos, escreva:
 
@@ -245,9 +253,9 @@ Exemplos:
 
 Dificuldades previstas:
 
-- Dificuldade 1:
-- Dificuldade 2:
-- Dificuldade 3:
+- Dificuldade 1: Implementação das colisões entre jogador, obstáculos e moedas.
+- Dificuldade 2: Controle do aumento gradual da velocidade do jogo.
+- Dificuldade 3: Organização do código em módulos e realização de testes com pytest.
 
 ## 14. Escopo mínimo para a entrega final
 
@@ -261,7 +269,7 @@ Exemplo:
 
 Escopo mínimo:
 
-> Escreva aqui.
+A versão mínima do jogo terá um carro controlado pelo teclado, obstáculos aparecendo na pista, sistema de vidas, coleta de moedas, pontuação, aumento de dificuldade e tela de fim de jogo.
 
 ## 15. Possíveis melhorias, caso haja tempo
 
@@ -281,6 +289,6 @@ Exemplos:
 
 Melhorias possíveis:
 
-- Melhoria 1:
-- Melhoria 2:
-- Melhoria 3:
+- Melhoria 1: Tela inicial e menu de pausa.
+- Melhoria 2: Sistema de ranking e recordes.
+- Melhoria 3: Sons, animações e diferentes tipos de obstáculos.
