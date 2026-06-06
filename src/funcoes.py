@@ -1,27 +1,37 @@
-def calcular_pontos(pontos_atual, pontos_ganhos):
-    """Soma os pontos ganhos à pontuação atual."""
-    return pontos_atual + pontos_ganhos
+import random
 
 
-def tomar_dano(vida_atual, dano):
-    """Reduz a vida atual com base no dano recebido."""
-    return vida_atual - dano
+def mover_jogador(x, esquerda, direita, velocidade, largura_tela, largura_carro):
+    """Move o carro horizontalmente dentro dos limites da tela."""
+    if esquerda and x > 0:
+        x -= velocidade
+    if direita and x < largura_tela - largura_carro:
+        x += velocidade
+    return x
 
 
-def jogador_perdeu(vidas):
-    """Indica se o jogador ficou sem vidas."""
-    return vidas <= 0
+def mover_obstaculo(y, velocidade):
+    """Desce o obstáculo na tela."""
+    return y + velocidade
 
 
-def limitar_valor(valor, minimo, maximo):
-    """Mantém um valor dentro do intervalo [minimo, maximo]."""
-    if valor < minimo:
-        return minimo
-    if valor > maximo:
-        return maximo
-    return valor
+def reiniciar_obstaculo(largura_tela, largura_obstaculo):
+    """Retorna nova posição (x, y) aleatória acima da tela para o obstáculo."""
+    x = random.randint(0, largura_tela - largura_obstaculo)
+    y = -largura_obstaculo
+    return x, y
 
 
 def verificar_colisao(retangulo_1, retangulo_2):
     """Verifica sobreposição entre dois retângulos do Pygame."""
     return retangulo_1.colliderect(retangulo_2)
+
+
+def calcular_pontos(pontos):
+    """Incrementa a pontuação em 1 ponto."""
+    return pontos + 1
+
+
+def jogador_perdeu(vidas):
+    """Indica se o jogador ficou sem vidas."""
+    return vidas <= 0
