@@ -2,11 +2,14 @@ import pygame
 
 from src.config import (
     LARGURA_TELA, ALTURA_TELA, FPS, TITULO_JOGO,
-    CINZA, VERMELHO, AZUL, BRANCO,
+    CINZA, VERMELHO, AZUL, BRANCO, AMARELO, VERDE, PRETO,
     LARGURA_CARRO, ALTURA_CARRO,
     LARGURA_OBSTACULO, ALTURA_OBSTACULO,
-    VELOCIDADE_CARRO, VELOCIDADE_OBSTACULO,
-    CAMINHO_RECORDE,
+    RAIO_MOEDA,
+    VELOCIDADE_CARRO, VELOCIDADE_OBSTACULO_BASE,
+    AUMENTO_VELOCIDADE, PONTOS_POR_NIVEL,
+    PONTOS_MOEDA, META_PONTOS, VIDAS_INICIAIS,
+    CAMINHO_RECORDE, CAMINHO_RANKING, TAMANHO_RANKING,
 )
 from src.funcoes import (
     mover_jogador,
@@ -15,89 +18,255 @@ from src.funcoes import (
     verificar_colisao,
     calcular_pontos,
     jogador_perdeu,
+    jogador_venceu,
+    calcular_velocidade,
 )
-from src.dados import salvar_recorde, carregar_recorde
+from src.dados import (
+    salvar_recorde,
+    carregar_recorde,
+    salvar_ranking,
+    carregar_ranking,
+)
 
 
-def desenhar_carro(tela, x, y):
-    """Desenha o carro do jogador na tela."""
+def _desenhar_carro(tela, x, y):
+    """Desenha o carro do jogador na tela com detalhes."""
     pygame.draw.rect(tela, VERMELHO, (x, y, LARGURA_CARRO, ALTURA_CARRO))
+    pygame.draw.rect(tela, (180, 0, 0), (x + 8, y + 6, LARGURA_CARRO - 16, ALTURA_CARRO - 14))
 
 
-def desenhar_obstaculo(tela, x, y):
-    """Desenha o obstáculo na tela."""
+def _desenhar_obstaculo(tela, x, y):
+    """Desenha o obstáculo na tela com detalhes."""
     pygame.draw.rect(tela, AZUL, (x, y, LARGURA_OBSTACULO, ALTURA_OBSTACULO))
+    pygame.draw.rect(tela, (0, 40, 160), (x + 8, y + 8, LARGURA_OBSTACULO - 16, ALTURA_OBSTACULO - 16))
 
 
-def desenhar_hud(tela, fonte, pontos, recorde, vidas):
-    """Exibe pontuação, recorde e vidas no canto superior da tela."""
+def _desenhar_moeda(tela, cx, cy):
+    """Desenha a moeda colecionável."""
+    pygame.draw.circle(tela, AMARELO, (cx, cy), RAIO_MOEDA)
+    pygame.draw.circle(tela, (200, 160, 0), (cx, cy), RAIO_MOEDA - 5)
+
+
+def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s, meta):
+    """Exibe a pontuação, recorde, vidas e tempo na tela."""
     texto = fonte.render(
-        f"Pontos: {pontos}  |  Recorde: {recorde}  |  Vidas: {vidas}",
-        True, BRANCO
+        f"Pontos: {pontos}/{meta}  |  Recorde: {recorde}  |  Vidas: {vidas}  |  Tempo: {tempo_s}s",
+        True, BRANCO,
     )
     tela.blit(texto, (10, 10))
 
 
-def executar_jogo():
-    """Executa o loop principal do jogo de carrinho."""
-    pygame.init()
+def _desenhar_pista(tela):
+    """Desenha marcações simples de pista no centro."""
+    for y in range(0, ALTURA_TELA, 80):
+        pygame.draw.rect(tela, (100, 100, 100), (LARGURA_TELA // 2 - 5, y, 10, 40))
 
-    tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
-    pygame.display.set_caption(TITULO_JOGO)
-    relogio = pygame.time.Clock()
-    fonte = pygame.font.SysFont(None, 30)
 
+# ---------------------------------------------------------------------------
+# Telas auxiliares
+# ---------------------------------------------------------------------------
+
+def _tela_nome(tela, relogio, fonte_grande, fonte_pequena):
+    """Tela inicial que captura o nome do jogador. Retorna None se fechar a janela."""
+    nome = ""
+    while True:
+        relogio.tick(FPS)
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                return None
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN and nome.strip():
+                    return nome.strip()
+                elif evento.key == pygame.K_BACKSPACE:
+                    nome = nome[:-1]
+                elif len(nome) < 15 and evento.unicode.isprintable() and evento.unicode != " " * len(evento.unicode):
+                    nome += evento.unicode
+
+        tela.fill(PRETO)
+
+        titulo = fonte_grande.render("TURBO ESCAPE", True, AMARELO)
+        tela.blit(titulo, (LARGURA_TELA // 2 - titulo.get_width() // 2, 130))
+
+        sub = fonte_pequena.render("Desvie dos obstáculos e colete moedas!", True, BRANCO)
+        tela.blit(sub, (LARGURA_TELA // 2 - sub.get_width() // 2, 210))
+
+        instrucao = fonte_pequena.render("Digite seu nome e pressione ENTER:", True, (180, 180, 180))
+        tela.blit(instrucao, (LARGURA_TELA // 2 - instrucao.get_width() // 2, 290))
+
+        cursor = "_" if (pygame.time.get_ticks() // 500) % 2 == 0 else " "
+        caixa = fonte_grande.render(nome + cursor, True, AMARELO)
+        tela.blit(caixa, (LARGURA_TELA // 2 - caixa.get_width() // 2, 335))
+
+        dica = fonte_pequena.render("Setas / A-D: mover   |   ESC: sair", True, (120, 120, 120))
+        tela.blit(dica, (LARGURA_TELA // 2 - dica.get_width() // 2, 430))
+
+        pygame.display.flip()
+
+
+def _tela_fim(tela, relogio, fonte_grande, fonte_pequena, venceu, pontos, recorde, nome):
+    """Tela de game over / vitória com ranking. Retorna True para jogar de novo."""
+    ranking = carregar_ranking(CAMINHO_RANKING, TAMANHO_RANKING)
+
+    while True:
+        relogio.tick(FPS)
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                return False
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    return True
+                if evento.key == pygame.K_ESCAPE:
+                    return False
+
+        tela.fill(PRETO)
+
+        if venceu:
+            msg = fonte_grande.render("VOCÊ VENCEU!", True, VERDE)
+        else:
+            msg = fonte_grande.render("GAME OVER", True, VERMELHO)
+        tela.blit(msg, (LARGURA_TELA // 2 - msg.get_width() // 2, 40))
+
+        info = fonte_pequena.render(
+            f"Pontuação final: {pontos}   |   Recorde: {recorde}", True, BRANCO
+        )
+        tela.blit(info, (LARGURA_TELA // 2 - info.get_width() // 2, 115))
+
+        titulo_rank = fonte_pequena.render("─── RANKING ───", True, AMARELO)
+        tela.blit(titulo_rank, (LARGURA_TELA // 2 - titulo_rank.get_width() // 2, 165))
+
+        for i, (n, p) in enumerate(ranking):
+            cor = AMARELO if n == nome else BRANCO
+            linha = fonte_pequena.render(f"{i + 1}.  {n}  —  {p} pts", True, cor)
+            tela.blit(linha, (LARGURA_TELA // 2 - linha.get_width() // 2, 205 + i * 36))
+
+        rodape = fonte_pequena.render("R = Jogar novamente   |   ESC = Sair", True, (120, 120, 120))
+        tela.blit(rodape, (LARGURA_TELA // 2 - rodape.get_width() // 2, 450))
+
+        pygame.display.flip()
+
+
+# ---------------------------------------------------------------------------
+# Loop principal de uma partida
+# ---------------------------------------------------------------------------
+
+def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jogador):
+    """Executa uma partida completa. Retorna True para jogar de novo, False para sair."""
     carro_x = LARGURA_TELA // 2 - LARGURA_CARRO // 2
     carro_y = ALTURA_TELA - ALTURA_CARRO - 20
 
-    obstaculo_x, obstaculo_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
+    obs_x, obs_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
+    moeda_cx = LARGURA_TELA // 4
+    moeda_cy = -RAIO_MOEDA * 2
 
     pontos = 0
-    vidas = 3
+    vidas = VIDAS_INICIAIS
     recorde = carregar_recorde(CAMINHO_RECORDE)
-    rodando = True
+    tempo_inicio = pygame.time.get_ticks()
 
-    while rodando:
+    while True:
         relogio.tick(FPS)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
-                rodando = False
+                return False
+            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+                return False
 
         teclas = pygame.key.get_pressed()
         carro_x = mover_jogador(
             carro_x,
-            teclas[pygame.K_LEFT],
-            teclas[pygame.K_RIGHT],
+            teclas[pygame.K_LEFT] or teclas[pygame.K_a],
+            teclas[pygame.K_RIGHT] or teclas[pygame.K_d],
             VELOCIDADE_CARRO,
             LARGURA_TELA,
             LARGURA_CARRO,
         )
 
-        obstaculo_y = mover_obstaculo(obstaculo_y, VELOCIDADE_OBSTACULO)
+        vel = calcular_velocidade(
+            VELOCIDADE_OBSTACULO_BASE, pontos, PONTOS_POR_NIVEL, AUMENTO_VELOCIDADE
+        )
 
-        if obstaculo_y > ALTURA_TELA:
-            obstaculo_x, obstaculo_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
-            pontos = calcular_pontos(pontos)
+        obs_y = mover_obstaculo(obs_y, vel)
+        moeda_cy = int(mover_obstaculo(moeda_cy, vel * 0.7))
 
-        carro_rect     = pygame.Rect(carro_x, carro_y, LARGURA_CARRO, ALTURA_CARRO)
-        obstaculo_rect = pygame.Rect(obstaculo_x, obstaculo_y, LARGURA_OBSTACULO, ALTURA_OBSTACULO)
+        if obs_y > ALTURA_TELA:
+            obs_x, obs_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
+            pontos = calcular_pontos(pontos, 1)
 
-        if verificar_colisao(carro_rect, obstaculo_rect):
+        if moeda_cy - RAIO_MOEDA > ALTURA_TELA:
+            mx, moeda_cy = reiniciar_obstaculo(LARGURA_TELA, RAIO_MOEDA * 2)
+            moeda_cx = mx + RAIO_MOEDA
+            moeda_cy = -RAIO_MOEDA
+
+        carro_rect = pygame.Rect(carro_x, carro_y, LARGURA_CARRO, ALTURA_CARRO)
+        obs_rect   = pygame.Rect(obs_x, obs_y, LARGURA_OBSTACULO, ALTURA_OBSTACULO)
+        moeda_rect = pygame.Rect(
+            moeda_cx - RAIO_MOEDA, moeda_cy - RAIO_MOEDA,
+            RAIO_MOEDA * 2, RAIO_MOEDA * 2,
+        )
+
+        if verificar_colisao(carro_rect, obs_rect):
             vidas -= 1
-            obstaculo_x, obstaculo_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
+            obs_x, obs_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
 
-        if jogador_perdeu(vidas):
-            rodando = False
+        if verificar_colisao(carro_rect, moeda_rect):
+            pontos = calcular_pontos(pontos, PONTOS_MOEDA)
+            mx, moeda_cy = reiniciar_obstaculo(LARGURA_TELA, RAIO_MOEDA * 2)
+            moeda_cx = mx + RAIO_MOEDA
+            moeda_cy = -RAIO_MOEDA
 
         if pontos > recorde:
             recorde = pontos
             salvar_recorde(CAMINHO_RECORDE, recorde)
 
+        tempo_s = (pygame.time.get_ticks() - tempo_inicio) // 1000
+
         tela.fill(CINZA)
-        desenhar_carro(tela, carro_x, carro_y)
-        desenhar_obstaculo(tela, obstaculo_x, obstaculo_y)
-        desenhar_hud(tela, fonte, pontos, recorde, vidas)
+        _desenhar_pista(tela)
+        _desenhar_obstaculo(tela, obs_x, obs_y)
+        _desenhar_moeda(tela, moeda_cx, moeda_cy)
+        _desenhar_carro(tela, carro_x, carro_y)
+        _desenhar_hud(tela, fonte_hud, pontos, recorde, vidas, tempo_s, META_PONTOS)
         pygame.display.flip()
+
+        if jogador_perdeu(vidas):
+            salvar_ranking(CAMINHO_RANKING, nome_jogador, pontos, TAMANHO_RANKING)
+            return _tela_fim(
+                tela, relogio, fonte_grande, fonte_hud,
+                venceu=False, pontos=pontos, recorde=recorde, nome=nome_jogador,
+            )
+
+        if jogador_venceu(pontos, META_PONTOS):
+            salvar_ranking(CAMINHO_RANKING, nome_jogador, pontos, TAMANHO_RANKING)
+            return _tela_fim(
+                tela, relogio, fonte_grande, fonte_hud,
+                venceu=True, pontos=pontos, recorde=recorde, nome=nome_jogador,
+            )
+
+
+# ---------------------------------------------------------------------------
+# Ponto de entrada
+# ---------------------------------------------------------------------------
+
+def executar_jogo():
+    """Inicializa o Pygame e gerencia o fluxo geral do jogo."""
+    pygame.init()
+
+    tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
+    pygame.display.set_caption(TITULO_JOGO)
+    relogio = pygame.time.Clock()
+    fonte_grande = pygame.font.SysFont(None, 58)
+    fonte_hud    = pygame.font.SysFont(None, 30)
+
+    nome_jogador = _tela_nome(tela, relogio, fonte_grande, fonte_hud)
+    if nome_jogador is None:
+        pygame.quit()
+        return
+
+    jogar_novamente = True
+    while jogar_novamente:
+        jogar_novamente = _loop_partida(
+            tela, relogio, fonte_hud, fonte_grande, fonte_hud, nome_jogador
+        )
 
     pygame.quit()
