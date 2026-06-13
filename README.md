@@ -80,11 +80,10 @@ O jogador começa com 3 vidas, coleta moedas para ganhar pontos e enfrenta aumen
 python -m pytest
 ```
 pip install -r requirements.txt
+ ##  Execute  no terminal
 python main.py
 
 ## Checklist mínimo para entrega
-
--
 ## Observações para os alunos
 
 - Mantenham o código organizado em módulos pequenos e com responsabilidade clara.
