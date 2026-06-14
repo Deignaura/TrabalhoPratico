@@ -1,11 +1,9 @@
 def salvar_recorde(caminho_arquivo, pontuacao):
-    """Salva a pontuação recorde em arquivo texto."""
     with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
         arquivo.write(str(pontuacao))
 
 
 def carregar_recorde(caminho_arquivo):
-    """Carrega o recorde salvo; retorna 0 se não existir valor válido."""
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
             conteudo = arquivo.read().strip()
@@ -17,7 +15,6 @@ def carregar_recorde(caminho_arquivo):
 
 
 def carregar_ranking(caminho_arquivo, tamanho=5):
-    """Retorna lista de (nome, pontos) ordenada do maior para o menor."""
     ranking = []
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
@@ -38,7 +35,6 @@ def carregar_ranking(caminho_arquivo, tamanho=5):
 
 
 def salvar_ranking(caminho_arquivo, nome, pontos, tamanho=5):
-    """Insere nova entrada no ranking e persiste os top N."""
     nome_limpo = nome.replace(":", "").replace("\n", "").strip()
     ranking = carregar_ranking(caminho_arquivo, tamanho * 2)
     ranking.append((nome_limpo, pontos))

@@ -58,10 +58,6 @@ def _desenhar_pista(tela):
         pygame.draw.rect(tela, (100, 100, 100), (LARGURA_TELA // 2 - 5, y, 10, 40))
 
 
-# ---------------------------------------------------------------------------
-# Telas auxiliares
-# ---------------------------------------------------------------------------
-
 def _tela_nome(tela, relogio, fonte_grande, fonte_pequena):
     """Tela inicial que captura o nome do jogador. Retorna None se fechar a janela."""
     nome = ""
@@ -100,7 +96,6 @@ def _tela_nome(tela, relogio, fonte_grande, fonte_pequena):
 
 
 def _tela_fim(tela, relogio, fonte_grande, fonte_pequena, venceu, pontos, recorde, nome):
-    """Tela de game over / vitória com ranking. Retorna True para jogar de novo."""
     ranking = carregar_ranking(CAMINHO_RANKING, TAMANHO_RANKING)
 
     while True:
@@ -140,13 +135,7 @@ def _tela_fim(tela, relogio, fonte_grande, fonte_pequena, venceu, pontos, record
 
         pygame.display.flip()
 
-
-# ---------------------------------------------------------------------------
-# Loop principal de uma partida
-# ---------------------------------------------------------------------------
-
 def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jogador):
-    """Executa uma partida completa. Retorna True para jogar de novo, False para sair."""
     carro_x = LARGURA_TELA // 2 - LARGURA_CARRO // 2
     carro_y = ALTURA_TELA - ALTURA_CARRO - 20
 
@@ -239,13 +228,7 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
                 venceu=True, pontos=pontos, recorde=recorde, nome=nome_jogador,
             )
 
-
-# ---------------------------------------------------------------------------
-# Ponto de entrada
-# ---------------------------------------------------------------------------
-
 def executar_jogo():
-    """Inicializa o Pygame e gerencia o fluxo geral do jogo."""
     pygame.init()
 
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
