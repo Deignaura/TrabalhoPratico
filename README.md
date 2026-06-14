@@ -13,41 +13,34 @@ Este repositório é um template para os grupos da disciplina. A proposta é com
 
 ## Organização planejada
 
-- `main.py`: inicia o jogo.
--`player.py` controla o carro do jogador
-- `assets/`: imagens, fontes e sons.
-- `obstacles.py` controla obstaculos.
-- `coins.py` controla as moedas.
-- `config.py` configurações gerais.
-- `utilis.py` funções auxiliadoreas.
-- `data/`: arquivos persistentes (recorde/ranking).
-- `tests/`: testes unitários com `pytest`.
-- `docs/`: documentação do projeto, incluindo proposta inicial.
+- * **`main.py` / `executar_jogo()`**: Ponto de entrada que gerencia a inicialização e a alternância entre as telas do jogo.
+* **`src/config.py`**: Centraliza as constantes do jogo (cores, dimensões da tela, velocidades base, metas e caminhos de arquivos).
+* **`src/funcoes.py`**: Contém as regras de física e estados do jogo (`mover_jogador`, `verificar_colisao`, `calcular_velocidade`, `jogador_venceu`, etc).
+* **`src/dados.py`**: Responsável pelo sistema de persistência (salvar/carregar recorde máximo e o histórico do ranking local).
+* **`data/`**: Pasta que armazena os arquivos de texto (`recorde.txt` e `ranking.txt`).
 
 ## Descrição do jogo
 
-O jogador controlará um carro em uma estrada 2D com movimentação lateral. Durante a corrida, carros, cones e barreiras aparecerão na pista como obstáculos. O objetivo será desviar dos obstáculos enquanto coleta moedas espalhadas pela estrada. Conforme o tempo passa, a velocidade do jogo aumenta, deixando a partida mais difícil e dinâmica.
-
+O jogador controla um carro em uma estrada 2D com movimentação lateral. Ao iniciar, o jogo solicita o nome do usuário para registro no sistema. Durante a corrida, obstáculos e moedas caem pela pista.
 
 ## Objetivo do jogador
 
-Sobreviver o maior tempo possível, evitar colisões e coletar moedas para alcançar a maior pontuação.
+Sobreviver aos obstáculos, coletar moedas e atingir a meta de pontos estipulada para vencer e garantir o topo do ranking.
 
 ## Regras do jogo
+* **Vidas Iniciais:** O jogador começa com 3 vidas.
+* **Colisão com Obstáculos:** Cada batida em um obstáculo reduz 1 vida. O obstáculo é reiniciado no topo.
+* **Coleta de Moedas:** Cada moeda coletada adiciona uma pontuação bônus (definida em `PONTOS_MOEDA`).
+* **Progressão de Dificuldade:** A velocidade da pista e dos elementos aumenta gradualmente com base na pontuação atual do jogador.
 
-Regra 1: O jogador começa com 3 vidas.
-Regra 2: Cada moeda coletada vale 5 pontos.
-Regra 3: Cada colisão com obstáculo remove 1 vida.
-Regra 4: A velocidade da pista e dos obstáculos aumenta gradualmente.
-Regra 5: O jogo termina quando as vidas chegam a zero.
 
 
 ## Condição de vitória
 
-O jogador vence ao atingir determinada pontuação, como 200 pontos, ou sobreviver até o final da corrida.
+O jogador vence o jogo de forma limpa assim que atingir a pontuação máxima definida pela constante `META_PONTOS`.
 
 ## Condição de derrota ou encerramento
-
+O jogo exibe a tela de *Game Over* se a quantidade de vidas chegar a 0. Em ambos os finais (vitória ou derrota), o nome e a pontuação são computados no ranking.
 O jogo termina quando o jogador perde todas as vidas após colidir com obstáculos.
 ## Elementos previstos no jogo
 Jogador ou elemento principal
@@ -64,35 +57,33 @@ Descrição:
 O jogador começa com 3 vidas, coleta moedas para ganhar pontos e enfrenta aumento gradual da velocidade do jogo
 
 ## Controles
+* **Seta Esquerda / Tecla A**: Mover o carro para a esquerda.
+* **Seta Direita / Tecla D**: Mover o carro para a direita.
+* **Tecla ENTER**: Confirmar o nome na tela inicial.
+* **Tecla R**: Reiniciar uma nova partida na tela de fim de jogo.
+* **Tecla ESC**: Sair do jogo a qualquer momento.
 
-Seta esquerda / A: mover para esquerda
-Seta direita / D: mover para direita
-ESC: sair do jogo
 
 ## Como executar o projeto
 
 ### 1. Clonar o repositório
 
-```bash
-git clone LINK_DO_REPOSITORIO
-cd NOME_DA_PASTA
-pip install -r requirements.txt
-python main.py
-```
+. Certifique-se de ter o Python 3.x instalado.
+2. Clone o repositório e acesse a pasta:
+   ```bash
+   git clone [https://github.com/Deignaura/TrabalhoPratico.git](https://github.com/Deignaura/TrabalhoPratico.git)
+   cd TrabajoPratico
 
 ## Como executar os testes
 
 ```bash
 python -m pytest
 ```
+pip install -r requirements.txt
+ ##  Execute  no terminal
+python main.py
 
 ## Checklist mínimo para entrega
-
-- Preencher este README com nome final, descrição real, regras e controles do jogo.
-- Atualizar `docs/proposta.MD` com a proposta do grupo.
-- Garantir que o jogo executa com `python main.py`.
-- Garantir que os testes passam com `pytest`.
-
 ## Observações para os alunos
 
 - Mantenham o código organizado em módulos pequenos e com responsabilidade clara.

@@ -1,6 +1,5 @@
 import random
 
-
 def mover_jogador(x, esquerda, direita, velocidade, largura_tela, largura_carro):
     if esquerda and x > 0:
         x -= velocidade

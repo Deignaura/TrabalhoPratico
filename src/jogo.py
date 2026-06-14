@@ -30,21 +30,25 @@ from src.dados import (
 
 
 def _desenhar_carro(tela, x, y):
+    """Desenha o carro do jogador na tela com detalhes."""
     pygame.draw.rect(tela, VERMELHO, (x, y, LARGURA_CARRO, ALTURA_CARRO))
     pygame.draw.rect(tela, (180, 0, 0), (x + 8, y + 6, LARGURA_CARRO - 16, ALTURA_CARRO - 14))
 
 
 def _desenhar_obstaculo(tela, x, y):
+    """Desenha o obstáculo na tela com detalhes."""
     pygame.draw.rect(tela, AZUL, (x, y, LARGURA_OBSTACULO, ALTURA_OBSTACULO))
     pygame.draw.rect(tela, (0, 40, 160), (x + 8, y + 8, LARGURA_OBSTACULO - 16, ALTURA_OBSTACULO - 16))
 
 
 def _desenhar_moeda(tela, cx, cy):
+    """Desenha a moeda colecionável."""
     pygame.draw.circle(tela, AMARELO, (cx, cy), RAIO_MOEDA)
     pygame.draw.circle(tela, (200, 160, 0), (cx, cy), RAIO_MOEDA - 5)
 
 
 def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s, meta):
+    """Exibe a pontuação, recorde, vidas e tempo na tela."""
     texto = fonte.render(
         f"Pontos: {pontos}/{meta}  |  Recorde: {recorde}  |  Vidas: {vidas}  |  Tempo: {tempo_s}s",
         True, BRANCO,
@@ -53,7 +57,7 @@ def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s, meta):
 
 
 def _desenhar_pista(tela):
-    """Desenha marcações simples de pista."""
+    """Desenha marcações simples de pista no centro."""
     for y in range(0, ALTURA_TELA, 80):
         pygame.draw.rect(tela, (100, 100, 100), (LARGURA_TELA // 2 - 5, y, 10, 40))
 
