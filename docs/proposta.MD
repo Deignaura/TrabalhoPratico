@@ -81,14 +81,6 @@ Sobreviver o maior tempo possível, evitar colisões e coletar moedas para alcan
 
 Liste as principais regras do jogo.
 
-Exemplo:
-
-- O jogador começa com 3 vidas.
-- Cada moeda coletada vale 10 pontos.
-- Cada colisão com obstáculo remove 1 vida.
-- A partida termina quando as vidas chegam a zero.
-- O jogador vence se alcançar 100 pontos.
-
 Regras do grupo:
 
 - Regra 1:  O jogador começa com 3 vidas.

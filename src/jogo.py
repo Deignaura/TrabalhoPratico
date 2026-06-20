@@ -10,6 +10,7 @@ from src.config import (
     AUMENTO_VELOCIDADE, PONTOS_POR_NIVEL,
     PONTOS_MOEDA, META_PONTOS, VIDAS_INICIAIS,
     CAMINHO_RECORDE, CAMINHO_RANKING, TAMANHO_RANKING,
+    DISTANCIA_CORRIDA,
 )
 from src.funcoes import (
     mover_jogador,
@@ -56,10 +57,26 @@ def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s, meta):
     tela.blit(texto, (10, 10))
 
 
-def _desenhar_pista(tela):
-    """Desenha marcações simples de pista no centro."""
-    for y in range(0, ALTURA_TELA, 80):
-        pygame.draw.rect(tela, (100, 100, 100), (LARGURA_TELA // 2 - 5, y, 10, 40))
+def _desenhar_pista(tela, offset):
+    """Desenha marcações de pista com efeito de rolagem para simular movimento."""
+    offset_int = int(offset) % 80
+    # Bordas laterais da pista
+    pygame.draw.rect(tela, BRANCO, (28, 0, 6, ALTURA_TELA))
+    pygame.draw.rect(tela, BRANCO, (LARGURA_TELA - 34, 0, 6, ALTURA_TELA))
+    # Linha central tracejada que rola para baixo
+    for y in range(-80 + offset_int, ALTURA_TELA + 80, 80):
+        pygame.draw.rect(tela, (160, 160, 160), (LARGURA_TELA // 2 - 5, y, 10, 40))
+
+
+def _desenhar_linha_chegada(tela, y):
+    """Desenha a linha de chegada com padrão xadrez."""
+    y_int = int(y)
+    tamanho = 25
+    colunas = LARGURA_TELA // tamanho
+    for row in range(2):
+        for col in range(colunas):
+            cor = BRANCO if (col + row) % 2 == 0 else PRETO
+            pygame.draw.rect(tela, cor, (col * tamanho, y_int + row * tamanho, tamanho, tamanho))
 
 
 def _tela_nome(tela, relogio, fonte_grande, fonte_pequena):
@@ -152,6 +169,9 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
     recorde = carregar_recorde(CAMINHO_RECORDE)
     tempo_inicio = pygame.time.get_ticks()
 
+    offset_pista = 0.0
+    linha_chegada_y = float(-DISTANCIA_CORRIDA)
+
     while True:
         relogio.tick(FPS)
 
@@ -170,6 +190,18 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
             LARGURA_TELA,
             LARGURA_CARRO,
         )
+        if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+            carro_y -= VELOCIDADE_CARRO
+        
+        # Mover para Baixo / Trás (Soma Y)
+        if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+            carro_y += VELOCIDADE_CARRO
+
+        # Limitadores para o carro não sair da tela pelas bordas de cima e de baixo
+        if carro_y < 0:
+            carro_y = 0
+        elif carro_y > ALTURA_TELA - ALTURA_CARRO:
+            carro_y = ALTURA_TELA - ALTURA_CARRO
 
         vel = calcular_velocidade(
             VELOCIDADE_OBSTACULO_BASE, pontos, PONTOS_POR_NIVEL, AUMENTO_VELOCIDADE
@@ -177,6 +209,8 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
 
         obs_y = mover_obstaculo(obs_y, vel)
         moeda_cy = int(mover_obstaculo(moeda_cy, vel * 0.7))
+        offset_pista = (offset_pista + vel) % 80
+        linha_chegada_y += vel
 
         if obs_y > ALTURA_TELA:
             obs_x, obs_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
@@ -211,11 +245,21 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
         tempo_s = (pygame.time.get_ticks() - tempo_inicio) // 1000
 
         tela.fill(CINZA)
-        _desenhar_pista(tela)
+        _desenhar_pista(tela, offset_pista)
+        if -50 <= linha_chegada_y <= ALTURA_TELA + 50:
+            _desenhar_linha_chegada(tela, linha_chegada_y)
         _desenhar_obstaculo(tela, obs_x, obs_y)
         _desenhar_moeda(tela, moeda_cx, moeda_cy)
         _desenhar_carro(tela, carro_x, carro_y)
         _desenhar_hud(tela, fonte_hud, pontos, recorde, vidas, tempo_s, META_PONTOS)
+
+        # Aviso quando linha de chegada está se aproximando
+        if -ALTURA_TELA < linha_chegada_y < 0:
+            pisca = (pygame.time.get_ticks() // 400) % 2 == 0
+            if pisca:
+                aviso = fonte_hud.render("LINHA DE CHEGADA!", True, AMARELO)
+                tela.blit(aviso, (LARGURA_TELA // 2 - aviso.get_width() // 2, ALTURA_TELA // 2 - 20))
+
         pygame.display.flip()
 
         if jogador_perdeu(vidas):
@@ -225,7 +269,8 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
                 venceu=False, pontos=pontos, recorde=recorde, nome=nome_jogador,
             )
 
-        if jogador_venceu(pontos, META_PONTOS):
+        cruzou_chegada = linha_chegada_y >= carro_y
+        if jogador_venceu(pontos, META_PONTOS) or cruzou_chegada:
             salvar_ranking(CAMINHO_RANKING, nome_jogador, pontos, TAMANHO_RANKING)
             return _tela_fim(
                 tela, relogio, fonte_grande, fonte_hud,
