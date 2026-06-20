@@ -181,6 +181,18 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
             LARGURA_TELA,
             LARGURA_CARRO,
         )
+        if teclas[pygame.K_UP] or teclas[pygame.K_w]:
+            carro_y -= VELOCIDADE_CARRO
+        
+        # Mover para Baixo / Trás (Soma Y)
+        if teclas[pygame.K_DOWN] or teclas[pygame.K_s]:
+            carro_y += VELOCIDADE_CARRO
+
+        # Limitadores para o carro não sair da tela pelas bordas de cima e de baixo
+        if carro_y < 0:
+            carro_y = 0
+        elif carro_y > ALTURA_TELA - ALTURA_CARRO:
+            carro_y = ALTURA_TELA - ALTURA_CARRO
 
         vel = calcular_velocidade(
             VELOCIDADE_OBSTACULO_BASE, pontos, PONTOS_POR_NIVEL, AUMENTO_VELOCIDADE
