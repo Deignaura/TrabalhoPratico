@@ -8,9 +8,8 @@ from src.config import (
     RAIO_MOEDA,
     VELOCIDADE_CARRO, VELOCIDADE_OBSTACULO_BASE,
     AUMENTO_VELOCIDADE, PONTOS_POR_NIVEL,
-    PONTOS_MOEDA, META_PONTOS, VIDAS_INICIAIS,
+    PONTOS_MOEDA, VIDAS_INICIAIS,
     CAMINHO_RECORDE, CAMINHO_RANKING, TAMANHO_RANKING,
-    DISTANCIA_CORRIDA,
 )
 from src.funcoes import (
     mover_jogador,
@@ -19,7 +18,6 @@ from src.funcoes import (
     verificar_colisao,
     calcular_pontos,
     jogador_perdeu,
-    jogador_venceu,
     calcular_velocidade,
 )
 from src.dados import (
@@ -28,6 +26,7 @@ from src.dados import (
     salvar_ranking,
     carregar_ranking,
 )
+from src.sons import inicializar_som
 
 
 def _desenhar_carro(tela, x, y):
@@ -48,10 +47,10 @@ def _desenhar_moeda(tela, cx, cy):
     pygame.draw.circle(tela, (200, 160, 0), (cx, cy), RAIO_MOEDA - 5)
 
 
-def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s, meta):
+def _desenhar_hud(tela, fonte, pontos, recorde, vidas, tempo_s):
     """Exibe a pontuação, recorde, vidas e tempo na tela."""
     texto = fonte.render(
-        f"Pontos: {pontos}/{meta}  |  Recorde: {recorde}  |  Vidas: {vidas}  |  Tempo: {tempo_s}s",
+        f"Pontos: {pontos}  |  Recorde: {recorde}  |  Vidas: {vidas}  |  Tempo: {tempo_s}s",
         True, BRANCO,
     )
     tela.blit(texto, (10, 10))
@@ -67,16 +66,6 @@ def _desenhar_pista(tela, offset):
     for y in range(-80 + offset_int, ALTURA_TELA + 80, 80):
         pygame.draw.rect(tela, (160, 160, 160), (LARGURA_TELA // 2 - 5, y, 10, 40))
 
-
-def _desenhar_linha_chegada(tela, y):
-    """Desenha a linha de chegada com padrão xadrez."""
-    y_int = int(y)
-    tamanho = 25
-    colunas = LARGURA_TELA // tamanho
-    for row in range(2):
-        for col in range(colunas):
-            cor = BRANCO if (col + row) % 2 == 0 else PRETO
-            pygame.draw.rect(tela, cor, (col * tamanho, y_int + row * tamanho, tamanho, tamanho))
 
 
 def _tela_nome(tela, relogio, fonte_grande, fonte_pequena):
@@ -156,7 +145,7 @@ def _tela_fim(tela, relogio, fonte_grande, fonte_pequena, venceu, pontos, record
 
         pygame.display.flip()
 
-def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jogador):
+def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jogador, sons):
     carro_x = LARGURA_TELA // 2 - LARGURA_CARRO // 2
     carro_y = ALTURA_TELA - ALTURA_CARRO - 20
 
@@ -170,15 +159,18 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
     tempo_inicio = pygame.time.get_ticks()
 
     offset_pista = 0.0
-    linha_chegada_y = float(-DISTANCIA_CORRIDA)
+
+    pygame.mixer.stop()
 
     while True:
         relogio.tick(FPS)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
+                pygame.mixer.stop()
                 return False
             if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
+                pygame.mixer.stop()
                 return False
 
         teclas = pygame.key.get_pressed()
@@ -210,7 +202,6 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
         obs_y = mover_obstaculo(obs_y, vel)
         moeda_cy = int(mover_obstaculo(moeda_cy, vel * 0.7))
         offset_pista = (offset_pista + vel) % 80
-        linha_chegada_y += vel
 
         if obs_y > ALTURA_TELA:
             obs_x, obs_y = reiniciar_obstaculo(LARGURA_TELA, LARGURA_OBSTACULO)
@@ -237,6 +228,8 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
             mx, moeda_cy = reiniciar_obstaculo(LARGURA_TELA, RAIO_MOEDA * 2)
             moeda_cx = mx + RAIO_MOEDA
             moeda_cy = -RAIO_MOEDA
+            if 'moeda' in sons:
+                sons['moeda'].play()
 
         if pontos > recorde:
             recorde = pontos
@@ -246,38 +239,22 @@ def _loop_partida(tela, relogio, fonte_hud, fonte_grande, fonte_pequena, nome_jo
 
         tela.fill(CINZA)
         _desenhar_pista(tela, offset_pista)
-        if -50 <= linha_chegada_y <= ALTURA_TELA + 50:
-            _desenhar_linha_chegada(tela, linha_chegada_y)
         _desenhar_obstaculo(tela, obs_x, obs_y)
         _desenhar_moeda(tela, moeda_cx, moeda_cy)
         _desenhar_carro(tela, carro_x, carro_y)
-        _desenhar_hud(tela, fonte_hud, pontos, recorde, vidas, tempo_s, META_PONTOS)
-
-        # Aviso quando linha de chegada está se aproximando
-        if -ALTURA_TELA < linha_chegada_y < 0:
-            pisca = (pygame.time.get_ticks() // 400) % 2 == 0
-            if pisca:
-                aviso = fonte_hud.render("LINHA DE CHEGADA!", True, AMARELO)
-                tela.blit(aviso, (LARGURA_TELA // 2 - aviso.get_width() // 2, ALTURA_TELA // 2 - 20))
-
+        _desenhar_hud(tela, fonte_hud, pontos, recorde, vidas, tempo_s)
         pygame.display.flip()
 
         if jogador_perdeu(vidas):
+            pygame.mixer.stop()
             salvar_ranking(CAMINHO_RANKING, nome_jogador, pontos, TAMANHO_RANKING)
             return _tela_fim(
                 tela, relogio, fonte_grande, fonte_hud,
                 venceu=False, pontos=pontos, recorde=recorde, nome=nome_jogador,
             )
 
-        cruzou_chegada = linha_chegada_y >= carro_y
-        if jogador_venceu(pontos, META_PONTOS) or cruzou_chegada:
-            salvar_ranking(CAMINHO_RANKING, nome_jogador, pontos, TAMANHO_RANKING)
-            return _tela_fim(
-                tela, relogio, fonte_grande, fonte_hud,
-                venceu=True, pontos=pontos, recorde=recorde, nome=nome_jogador,
-            )
-
 def executar_jogo():
+    pygame.mixer.pre_init(22050, -16, 2, 512)
     pygame.init()
 
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
@@ -285,6 +262,8 @@ def executar_jogo():
     relogio = pygame.time.Clock()
     fonte_grande = pygame.font.SysFont(None, 58)
     fonte_hud    = pygame.font.SysFont(None, 30)
+
+    sons = inicializar_som()
 
     nome_jogador = _tela_nome(tela, relogio, fonte_grande, fonte_hud)
     if nome_jogador is None:
@@ -294,7 +273,7 @@ def executar_jogo():
     jogar_novamente = True
     while jogar_novamente:
         jogar_novamente = _loop_partida(
-            tela, relogio, fonte_hud, fonte_grande, fonte_hud, nome_jogador
+            tela, relogio, fonte_hud, fonte_grande, fonte_hud, nome_jogador, sons
         )
 
     pygame.quit()

@@ -103,7 +103,7 @@ Exemplos:
 
 Condição de vitória:
 
-O jogador vence ao atingir determinada pontuação, como 200 pontos, ou sobreviver até o final da corrida.
+Não há condição de vitória fixa. O jogo é baseado em recorde: o objetivo é coletar o maior número de moedas possível antes de perder todas as vidas. A pontuação máxima é salva automaticamente entre sessões.
 
 ## 8. Condição de derrota ou encerramento
 
@@ -133,7 +133,7 @@ Exemplo:
 
 Descrição:
 
- Um carro controlado pelo teclado que pode se mover para esquerda e direita na pista.
+ Um carro controlado pelo teclado que pode se mover para esquerda, direita, frente e para trás na pista.
 
 ## Obstáculos, inimigos ou desafios
 
@@ -143,7 +143,7 @@ Exemplo:
 
 Descrição:
 
-Carros, cones e barreiras aparecem aleatoriamente na pista e devem ser evitados. Itens, alvos ou objetos de interação
+Carros aparecem aleatoriamente na pista e devem ser evitados. 
 
 ## Itens, alvos ou objetos de interação
 
@@ -153,7 +153,7 @@ Exemplo:
 
 Descrição:
 
-Moedas aparecem na estrada e aumentam a pontuação quando coletadas. Pontuação, vidas, tempo ou progresso
+Moedas aparecem na estrada e aumentam a pontuação quando coletadas. 
 
 ## Pontuação, vidas, tempo ou progresso
 
@@ -182,6 +182,9 @@ Controles do grupo:
 
 - Tecla/comando:Seta esquerda / A: mover para esquerda 
 - Tecla/comando: Seta direita / D: mover para direita 
+- Tecla/comando: Seta cima / W: mover para cima
+- Tecla/comando: Seta baixo / S: mover para baixo
+- Tecla/comando: R: para tentar de novo
 - Tecla/comando: ESC: sair do jogo
 
 ## 11. Organização inicial do código
@@ -198,15 +201,17 @@ Exemplo:
 
 Organização planejada:
 
-- main.py: inicia o jogo. -player.py controla o carro do jogador
-- assets/: imagens, fontes e sons.
-- obstacles.py controla obstaculos.
-- coins.py controla as moedas.
-- config.py configurações gerais.
-- utilis.py funções auxiliadoreas.
-- data/: arquivos persistentes (recorde/ranking).
-- tests/: testes unitários com pytest.
-- docs/: documentação do projeto, incluindo proposta inicial.
+- `main.py`: ponto de entrada — chama `executar_jogo()`.
+- `src/jogo.py`: loop principal, eventos, atualização e renderização.
+- `src/config.py`: constantes globais (tela, cores, velocidades, caminhos).
+- `src/funcoes.py`: funções auxiliares de regra e lógica.
+- `src/dados.py`: leitura e gravação de recorde e ranking.
+- `src/sons.py`: geração programática dos efeitos sonoros.
+- `src/sprites.py`: carregamento e recorte de spritesheet.
+- `assets/`: imagens, fontes e sons.
+- `data/`: arquivos persistentes (`recorde.txt` e `ranking.txt`).
+- `tests/`: testes unitários com pytest.
+- `docs/`: documentação do projeto, incluindo esta proposta.
 
 
 ## 12. Recursos externos previstos
@@ -222,11 +227,7 @@ Exemplo:
 
 Recursos previstos:
 
-Pretendemos utilizar imagens, sons e fontes gratuitas para melhorar a experiência do jogador, além de tutoriais apenas como referência para implementação de funcionalidades.
-
-Caso não pretenda utilizar recursos externos, escreva:
-
-> Não pretendemos utilizar recursos externos.
+Os sons do jogo (coleta de moeda) são gerados programaticamente com Python puro, sem arquivos externos, usando síntese de onda via módulo `array`. Os gráficos são desenhados com as primitivas do Pygame. Não foram utilizados recursos externos de terceiros.
 
 ## 13. Principais dificuldades esperadas
 
@@ -279,8 +280,10 @@ Exemplos:
 - diferentes personagens;
 - menu de pausa.
 
-Melhorias possíveis:
+Melhorias implementadas:
 
-- Melhoria 1: Tela inicial e menu de pausa.
-- Melhoria 2: Sistema de ranking e recordes.
-- Melhoria 3: Sons, animações e diferentes tipos de obstáculos.
+- Tela inicial com captura de nome do jogador.
+- Sistema de ranking e recorde persistido em arquivo.
+- Efeito de estrada rolando para simular movimento real do carro.
+- Efeito sonoro ao coletar moeda (síntese programática).
+- Aumento gradual de dificuldade conforme a pontuação cresce.
