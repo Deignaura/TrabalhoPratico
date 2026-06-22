@@ -1,2 +1,1 @@
-Amanda:61
-Clara:20
+Teste:27

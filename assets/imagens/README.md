@@ -4,7 +4,8 @@ Pasta destinada a sprites, fundos, icones e outros elementos visuais.
 
 ## Conteudo atual
 
-- `spritesheet.bmp`: spritesheet base do template.
+- 
+![alt text](image.png)
 
 ## Recomendações
 
