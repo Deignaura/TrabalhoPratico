@@ -12,8 +12,8 @@ AMARELO  = (255, 220, 0)
 VERDE    = (0, 200, 80)
 PRETO    = (10, 10, 10)
 
-LARGURA_CARRO     = 50
-ALTURA_CARRO      = 40
+LARGURA_CARRO     = 80
+ALTURA_CARRO      = 140
 LARGURA_OBSTACULO = 50
 ALTURA_OBSTACULO  = 50
 RAIO_MOEDA        = 15
@@ -28,4 +28,5 @@ VIDAS_INICIAIS = 3
 
 CAMINHO_RECORDE = "data/recorde.txt"
 CAMINHO_RANKING = "data/ranking.txt"
+CAMINHO_RANKING_MOEDAS = "data/ranking_moedas.txt"
 TAMANHO_RANKING = 5

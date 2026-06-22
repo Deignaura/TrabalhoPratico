@@ -1,9 +1,11 @@
 def salvar_recorde(caminho_arquivo, pontuacao):
+    """Salva a pontuação recorde em arquivo texto."""
     with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
         arquivo.write(str(pontuacao))
 
 
 def carregar_recorde(caminho_arquivo):
+    """Carrega o recorde salvo; retorna 0 se não existir valor válido."""
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
             conteudo = arquivo.read().strip()
@@ -15,6 +17,7 @@ def carregar_recorde(caminho_arquivo):
 
 
 def carregar_ranking(caminho_arquivo, tamanho=5):
+    """Retorna lista de (nome, pontos) ordenada do maior para o menor."""
     ranking = []
     try:
         with open(caminho_arquivo, "r", encoding="utf-8") as arquivo:
@@ -35,11 +38,76 @@ def carregar_ranking(caminho_arquivo, tamanho=5):
 
 
 def salvar_ranking(caminho_arquivo, nome, pontos, tamanho=5):
+    """Atualiza o ranking mantendo apenas uma entrada por jogador."""
     nome_limpo = nome.replace(":", "").replace("\n", "").strip()
     ranking = carregar_ranking(caminho_arquivo, tamanho * 2)
-    ranking.append((nome_limpo, pontos))
+
+    encontrou = False
+
+    for i, (n, p) in enumerate(ranking):
+        if n.lower() == nome_limpo.lower():
+            encontrou = True
+
+            if pontos > p:
+                ranking[i] = (nome_limpo, pontos)
+            break
+
+    if not encontrou:
+        ranking.append((nome_limpo, pontos))
+
     ranking.sort(key=lambda item: item[1], reverse=True)
     ranking = ranking[:tamanho]
     with open(caminho_arquivo, "w", encoding="utf-8") as arquivo:
         for n, p in ranking:
             arquivo.write(f"{n}:{p}\n")
+
+def carregar_moedas():
+    try:
+        with open("data/moedas.txt", "r") as arquivo:
+            return int(arquivo.read())
+    except:
+        return 0
+    
+def salvar_moedas(valor):
+    with open("data/moedas.txt", "w") as arquivo:
+        arquivo.write(str(valor))
+
+
+def carregar_carro():
+    try:
+        with open("data/carro.txt", "r") as arquivo:
+            return arquivo.read().strip()
+    except:
+        return "vermelho"
+
+
+def salvar_carro(carro):
+    with open("data/carro.txt", "w") as arquivo:
+        arquivo.write(carro)
+
+
+def carregar_carro_selecionado():
+    try:
+        with open("data/carro_selecionado.txt", "r", encoding="utf-8") as arquivo:
+            return arquivo.read().strip()
+    except:
+        return "basico"
+
+
+def salvar_carro_selecionado(carro):
+    with open("data/carro_selecionado.txt", "w", encoding="utf-8") as arquivo:
+        arquivo.write(carro)
+
+
+def carregar_carros():
+    try:
+        with open("data/carros.txt", "r", encoding="utf-8") as arquivo:
+            return arquivo.read().splitlines()
+    except:
+        return ["basico"]
+
+
+def salvar_carros(lista_carros):
+    with open("data/carros.txt", "w", encoding="utf-8") as arquivo:
+        for carro in lista_carros:
+            arquivo.write(carro + "\n")
